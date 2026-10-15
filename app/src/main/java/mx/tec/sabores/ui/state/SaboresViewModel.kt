@@ -10,6 +10,8 @@ import mx.tec.sabores.domain.Restaurant
 import mx.tec.sabores.domain.Review
 import mx.tec.sabores.domain.ReviewValidator
 
+data class MyReviewItem(val restaurantName: String, val review: Review)
+
 class SaboresViewModel : ViewModel() {
 
     private val repository = RestaurantRepository()
@@ -20,6 +22,11 @@ class SaboresViewModel : ViewModel() {
     // Estado que SÍ cambia: Compose se suscribe y recompone solo.
     var reviews by mutableStateOf<List<Review>>(emptyList())
         private set                                   // ← nadie de afuera puede asignarlo
+
+    val myReviews: List<MyReviewItem>
+        get() = reviews.reversed().mapNotNull { review ->
+            restaurantById(review.restaurantId)?.let { MyReviewItem(it.name, review) }
+        }
 
     fun restaurantById(id: Int): Restaurant? = repository.getById(id)
 
