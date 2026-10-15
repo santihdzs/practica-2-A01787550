@@ -23,10 +23,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -43,13 +39,11 @@ import mx.tec.sabores.ui.theme.SaboresTheme
 fun RestaurantDetailScreen(
     restaurant: Restaurant,
     summary: RatingSummary,
+    reviews: List<Review>,
     onWriteReviewClick: () -> Unit,
     onBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // ❌ A PROPÓSITO MAL
-    var reviews by remember { mutableStateOf(listOf<Review>()) }
-
     Scaffold(
         modifier = modifier,
         topBar = {
@@ -64,7 +58,7 @@ fun RestaurantDetailScreen(
         },
         floatingActionButton = {
             ExtendedFloatingActionButton(
-                onClick = { reviews = reviews + Review(restaurant.id, 5, "Estuvo increíble, volvería mañana") },
+                onClick = onWriteReviewClick,
                 icon = { Icon(Icons.Default.Star, contentDescription = null) },
                 text = { Text("Escribir reseña") }
             )
@@ -124,6 +118,7 @@ private fun DetailPreview() {
         RestaurantDetailScreen(
             restaurant = RestaurantRepository().getAll().first(),
             summary = RatingSummary(4.5, 2),
+            reviews = listOf(Review(1, 5, "Los tacos de guisado están buenísimos")),
             onWriteReviewClick = {},
             onBack = {}
         )

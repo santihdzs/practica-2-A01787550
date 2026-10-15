@@ -1,0 +1,38 @@
+package mx.tec.sabores.ui.state
+
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.lifecycle.ViewModel
+import mx.tec.sabores.data.RestaurantRepository
+import mx.tec.sabores.domain.RatingSummary
+import mx.tec.sabores.domain.Restaurant
+import mx.tec.sabores.domain.Review
+import mx.tec.sabores.domain.ReviewValidator
+
+class SaboresViewModel : ViewModel() {
+
+    private val repository = RestaurantRepository()
+
+    // Estado que NO cambia: se lee una vez.
+    val restaurants: List<Restaurant> = repository.getAll()
+
+    // Estado que SÍ cambia: Compose se suscribe y recompone solo.
+    var reviews by mutableStateOf<List<Review>>(emptyList())
+        private set                                   // ← nadie de afuera puede asignarlo
+
+    fun restaurantById(id: Int): Restaurant? = repository.getById(id)
+
+    fun reviewsOf(restaurantId: Int): List<Review> =
+        reviews.filter { it.restaurantId == restaurantId }
+
+    fun summaryOf(restaurantId: Int): RatingSummary =
+        RatingSummary.from(reviewsOf(restaurantId))     // ← el dominio decide; el VM pregunta
+
+    // --- eventos que llegan desde la UI ---
+
+    fun addReview(restaurantId: Int, stars: Int, comment: String) {
+        if (!ReviewValidator.isValid(stars, comment)) return    // ← el dominio manda
+        reviews = reviews + Review(restaurantId, stars, comment.trim())
+    }
+}
